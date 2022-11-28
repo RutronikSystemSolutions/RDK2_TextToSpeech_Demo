@@ -1,7 +1,7 @@
 /******************************************************************************
 * File Name:   main.c
 *
-* Description: This is the source code for the RutDevKit-RutCO2Alarm
+* Description: This is the source code for the RutDevKit-TextToSpeech_Demo
 *              Application for ModusToolbox.
 *
 * Related Document: See README.md
@@ -58,8 +58,32 @@
 #include "spi_api.h"
 
 #define GREETING_PHRASE		0
+/*Priority for button interrupts*/
+#define BTN_IRQ_PRIORITY		5
 
+/*Function prototypes used for this demo.*/
 void handle_error(void);
+void btn1_interrupt_handler(void *handler_arg, cyhal_gpio_event_t event);
+void btn2_interrupt_handler(void *handler_arg, cyhal_gpio_event_t event);
+
+cyhal_gpio_callback_data_t btn1_data =
+{
+		.callback = btn1_interrupt_handler,
+		.callback_arg = NULL,
+
+};
+
+cyhal_gpio_callback_data_t btn2_data =
+{
+		.callback = btn2_interrupt_handler,
+		.callback_arg = NULL,
+};
+
+/*The variables for playing phrases*/
+_Bool play_next = false;
+_Bool play_prev = false;
+uint16_t current_phrase;
+
 
 int main(void)
 {
@@ -81,8 +105,25 @@ int main(void)
     if (result != CY_RSLT_SUCCESS)
     {handle_error();}
 
-    cyhal_gpio_write((cyhal_gpio_t)LED1, CYBSP_LED_STATE_ON);
+    /*Indicate the beginning of the initialization*/
+	cyhal_gpio_write((cyhal_gpio_t)LED1, CYBSP_LED_STATE_OFF);
+	cyhal_gpio_write((cyhal_gpio_t)LED2, CYBSP_LED_STATE_ON);
 
+    /*Initialize Buttons*/
+    result = cyhal_gpio_init(USER_BTN1, CYHAL_GPIO_DIR_INPUT, CYHAL_GPIO_DRIVE_NONE, false);
+    if (result != CY_RSLT_SUCCESS)
+    {handle_error();}
+    result = cyhal_gpio_init(USER_BTN2, CYHAL_GPIO_DIR_INPUT, CYHAL_GPIO_DRIVE_NONE, false);
+    if (result != CY_RSLT_SUCCESS)
+    {handle_error();}
+
+    /*Register callback functions */
+    cyhal_gpio_register_callback(USER_BTN1, &btn1_data);
+    cyhal_gpio_register_callback(USER_BTN2, &btn2_data);
+
+    /* Enable falling edge interrupt events */
+    cyhal_gpio_enable_event(USER_BTN1, CYHAL_GPIO_IRQ_FALL, BTN_IRQ_PRIORITY, true);
+    cyhal_gpio_enable_event(USER_BTN2, CYHAL_GPIO_IRQ_FALL, BTN_IRQ_PRIORITY, true);
     __enable_irq();
 
     result = cy_retarget_io_init( KITPROG_TX, KITPROG_RX, CY_RETARGET_IO_BAUDRATE);
@@ -91,7 +132,7 @@ int main(void)
         handle_error();
     }
     printf("\x1b[2J\x1b[;H");
-    printf("RDK3 Text-to-Speech Demonstration.\r\n");
+    printf("RDK2 Text-to-Speech Demonstration.\r\n");
 
 	/*Initialize Epson ASIC*/
 	result = EPSON_Initialize();
@@ -127,28 +168,70 @@ int main(void)
 	printf("S1V30340 SPI Initialization succeeded. \n\r");
 
 	/*Play the greeting*/
+	current_phrase = GREETING_PHRASE;
 	GPIO_ControlMute(1); /*Mute - OFF*/
-	S1V30340_Play_Specific_Audio(GREETING_PHRASE);
+	S1V30340_Play_Specific_Audio(current_phrase);
 	S1V30340_Wait_For_Termination();
 	GPIO_ControlMute(0); /*Mute - ON*/
 
-	cyhal_gpio_write((cyhal_gpio_t)LED1, CYBSP_LED_STATE_OFF);
-	cyhal_gpio_write((cyhal_gpio_t)LED2, CYBSP_LED_STATE_ON);
+    /*Indicate the end of the initialization*/
+	cyhal_gpio_write((cyhal_gpio_t)LED1, CYBSP_LED_STATE_ON);
+	cyhal_gpio_write((cyhal_gpio_t)LED2, CYBSP_LED_STATE_OFF);
 
     for (;;)
     {
     	CyDelay(500);
-    	GPIO_ControlMute(1); /*Mute - OFF*/
-    	for(uint8_t i = 1; i < 10; i++)
+
+    	if(play_next)
     	{
-    		cyhal_gpio_toggle(LED2);
-        	S1V30340_Play_Specific_Audio(GREETING_PHRASE+i);
-        	printf("Playing phrase %d. \n\r", GREETING_PHRASE+i);
-        	S1V30340_Wait_For_Termination();
+    		cyhal_gpio_write((cyhal_gpio_t)LED1, CYBSP_LED_STATE_OFF);
+    		cyhal_gpio_write((cyhal_gpio_t)LED2, CYBSP_LED_STATE_ON);
+
+    		play_next = false;
+    		current_phrase++;
+    		GPIO_ControlMute(1); /*Mute - OFF*/
+    		S1V30340_Play_Specific_Audio(current_phrase);
+    		S1V30340_Wait_For_Termination();
+    		GPIO_ControlMute(0); /*Mute - ON*/
+
+    		cyhal_gpio_write((cyhal_gpio_t)LED1, CYBSP_LED_STATE_ON);
+    		cyhal_gpio_write((cyhal_gpio_t)LED2, CYBSP_LED_STATE_OFF);
     	}
-    	GPIO_ControlMute(0); /*Mute - ON*/
-    	cyhal_gpio_write((cyhal_gpio_t)LED2, CYBSP_LED_STATE_ON);
+
+    	if(play_prev)
+    	{
+    		cyhal_gpio_write((cyhal_gpio_t)LED1, CYBSP_LED_STATE_OFF);
+    		cyhal_gpio_write((cyhal_gpio_t)LED2, CYBSP_LED_STATE_ON);
+
+    		play_prev = false;
+    		current_phrase--;
+    		GPIO_ControlMute(1); /*Mute - OFF*/
+    		S1V30340_Play_Specific_Audio(current_phrase);
+    		S1V30340_Wait_For_Termination();
+    		GPIO_ControlMute(0); /*Mute - ON*/
+
+    		cyhal_gpio_write((cyhal_gpio_t)LED1, CYBSP_LED_STATE_ON);
+    		cyhal_gpio_write((cyhal_gpio_t)LED2, CYBSP_LED_STATE_OFF);
+    	}
     }
+}
+
+/* Interrupt handler callback function */
+void btn1_interrupt_handler(void *handler_arg, cyhal_gpio_event_t event)
+{
+	CY_UNUSED_PARAMETER(handler_arg);
+    CY_UNUSED_PARAMETER(event);
+
+    play_prev = true;
+}
+
+/* Interrupt handler callback function */
+void btn2_interrupt_handler(void *handler_arg, cyhal_gpio_event_t event)
+{
+	CY_UNUSED_PARAMETER(handler_arg);
+    CY_UNUSED_PARAMETER(event);
+
+    play_next = true;
 }
 
 void handle_error(void)
