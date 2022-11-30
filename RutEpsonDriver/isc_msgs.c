@@ -35,8 +35,7 @@ unsigned char aucIscTestReq[HEADER_LEN + LEN_ISC_TEST_REQ] = {
 	LEN_ISC_TEST_REQ, 0x00,
 	_GET_LOW_BYTE(ID_ISC_TEST_REQ), _GET_HIGH_BYTE(ID_ISC_TEST_REQ),
 	0x00, 0x00,				// Check-Sum 1:Enable 0:Disable
-	0x01, 0x00,				// 1:Full duplex, 0:Half duplex
-	//0xe1, 0x48, 0xe6, 0x55, // key-code	0x85, 0x1F, 0xAA, 0x1A, // key-code
+	0x01, 0x00,				// 1:Full duplex, 0:Half duplex	0x85, 0x1F, 0xAA, 0x1A, // key-code
 };
 #endif
 

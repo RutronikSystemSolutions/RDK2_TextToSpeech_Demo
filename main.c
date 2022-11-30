@@ -57,7 +57,10 @@
 #include "cy_retarget_io.h"
 #include "spi_api.h"
 
-#define GREETING_PHRASE		0
+/*First and last phrases of the TTS list*/
+#define FIRST_PHRASE			0
+#define LAST_PHRASE				5
+
 /*Priority for button interrupts*/
 #define BTN_IRQ_PRIORITY		5
 
@@ -82,7 +85,7 @@ cyhal_gpio_callback_data_t btn2_data =
 /*The variables for playing phrases*/
 _Bool play_next = false;
 _Bool play_prev = false;
-uint16_t current_phrase;
+int16_t current_phrase;
 
 
 int main(void)
@@ -168,8 +171,9 @@ int main(void)
 	printf("S1V30340 SPI Initialization succeeded. \n\r");
 
 	/*Play the greeting*/
-	current_phrase = GREETING_PHRASE;
+	current_phrase = FIRST_PHRASE;
 	GPIO_ControlMute(1); /*Mute - OFF*/
+	printf("Playing a phrase: %i. \n\r", current_phrase);
 	S1V30340_Play_Specific_Audio(current_phrase);
 	S1V30340_Wait_For_Termination();
 	GPIO_ControlMute(0); /*Mute - ON*/
@@ -189,6 +193,11 @@ int main(void)
 
     		play_next = false;
     		current_phrase++;
+    		if(current_phrase > LAST_PHRASE)
+    		{
+    			current_phrase = FIRST_PHRASE;
+    		}
+    		printf("Playing a phrase: %i. \n\r", current_phrase);
     		GPIO_ControlMute(1); /*Mute - OFF*/
     		S1V30340_Play_Specific_Audio(current_phrase);
     		S1V30340_Wait_For_Termination();
@@ -205,6 +214,11 @@ int main(void)
 
     		play_prev = false;
     		current_phrase--;
+    		if(current_phrase < FIRST_PHRASE)
+    		{
+    			current_phrase = LAST_PHRASE;
+    		}
+    		printf("Playing a phrase: %i. \n\r", current_phrase);
     		GPIO_ControlMute(1); /*Mute - OFF*/
     		S1V30340_Play_Specific_Audio(current_phrase);
     		S1V30340_Wait_For_Termination();
