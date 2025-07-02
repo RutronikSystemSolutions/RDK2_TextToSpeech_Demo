@@ -8,7 +8,7 @@ This example demonstrates the Rutronik's Text-To-Speech Arduino adapter control.
 
 ## Requirements
 
-- [ModusToolbox® software](https://www.infineon.com/cms/en/design-support/tools/sdk/modustoolbox-software/) **v3.x** [built with **v3.0**]
+- [ModusToolbox® software](https://www.infineon.com/cms/en/design-support/tools/sdk/modustoolbox-software/) **v2025.4.0** [built with **v3.0**]
 
 ## Supported toolchains (make variable 'TOOLCHAIN')
 
@@ -152,7 +152,7 @@ The audio volume level is hardcoded in this code example. Please modify the isc_
 
 ### Debugging
 
-If you successfully have imported the example, the debug configurations are already prepared to use with a the KitProg3, MiniProg4, or J-link. Open the ModusToolbox perspective and find the Quick Panel. Click on the desired debug launch configuration and wait until the programming completes and the debugging starts.
+If you have successfully imported the example, the debug configurations are already prepared to use with the KitProg3, MiniProg4. Open the ModusToolbox perspective and find the Quick Panel. Click on the desired debug launch configuration and wait until the programming completes and the debugging starts.
 
 <img src="images/tts_debug.png" style="zoom:100%;" />
 
