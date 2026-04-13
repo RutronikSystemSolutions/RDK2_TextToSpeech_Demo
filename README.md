@@ -8,11 +8,11 @@ This example demonstrates the Rutronik's Text-To-Speech Arduino adapter control.
 
 ## Requirements
 
-- [ModusToolbox® software](https://www.infineon.com/cms/en/design-support/tools/sdk/modustoolbox-software/) **v2025.4.0** [built with **v3.0**]
+- [ModusToolbox® software](https://www.infineon.com/cms/en/design-support/tools/sdk/modustoolbox-software/) **v3.7** [built with **v3.0**]
 
 ## Supported toolchains (make variable 'TOOLCHAIN')
 
-- GNU Arm&reg; Embedded Compiler v11.3.1 (`GCC_ARM`) - Default value of `TOOLCHAIN`
+- GNU Arm&reg; Embedded Compiler v14.2.1 (`GCC_ARM`) - Default value of `TOOLCHAIN`
 
 ## Using the code example
 
@@ -69,7 +69,7 @@ The following example clones the "[Hello world](https://github.com/Infineon/mtb-
 
 **Note:** The project-creator-cli tool uses the `git clone` and `make getlibs` commands to fetch the repository and import the required libraries. For details, see the "Project creator tools" section of the [ModusToolbox&trade; software user guide](https://www.infineon.com/ModusToolboxUserGuide) (locally available at *{ModusToolbox&trade; software install directory}/docs_{version}/mtb_user_guide.pdf*).
 
-To work with a different supported kit later, use the [Library Manager](https://www.infineon.com/ModusToolboxLibraryManager) to choose the BSP for the supported kit. You can invoke the Library Manager GUI tool from the terminal using `make modlibs` command or use the Library Manager CLI tool "library-manager-cli" to change the BSP.
+To work with a different supported kit later, use the [Library Manager](https://www.infineon.com/ModusToolboxLibraryManager) to select the BSP for that kit. You can invoke the Library Manager GUI tool from the terminal using `make modlibs` command or use the Library Manager CLI tool "library-manager-cli" to change the BSP.
 
 The "library-manager-cli" tool has the following arguments:
 
@@ -82,7 +82,7 @@ The "library-manager-cli" tool has the following arguments:
 
 <br />
 
-Following example adds the CY8CPROTO-062-4343W BSP to the already created application and makes it the active BSP for the app:
+The following example adds the CY8CPROTO-062-4343W BSP to the already created application and makes it the active BSP for the app:
 
    ```
    library-manager-cli --project "C:/mtb_projects/MyHelloWorld" --add-bsp-name CY8CPROTO-062-4343W --add-bsp-version "latest-v4.X" --add-bsp-location "local"
@@ -123,11 +123,11 @@ For a list of supported IDEs and more details, see the "Exporting to IDEs" secti
 
 ### Operation
 
-This code example enables developer to play the voice messages [phrases] that are programmed into the Text-To-Speech board's serial flash memory. If the  button "USER_BTN1" is pressed - next phrase will be played. If the  button "USER_BTN2" is pressed - previous phrase will be played. The number of the phrase that is being played by the Text-To-Speech adapter will be printed out through the KitProg3 UART on a terminal window.
+This code example enables developers to play the voice messages [phrases] that are programmed into the Text-To-Speech board's serial flash memory. If the button "USER_BTN1" is pressed, the next phrase will be played. If the button "USER_BTN2" is pressed, the previous phrase will be played. The number of the phrase being played by the Text-To-Speech adapter will be printed to the KitProg3 UART in a terminal window.
 
 <img src="images/tts_output.png" style="zoom:100%;" />
 
-If you are not using the voice files provided with this code example, please do not forget to modify the key-code provided by Epson in isc_msgs.c file. Please also note that it has to be entered in reverse sequence. For example, the key code **0x1AAA1F85** has to be provided as it is shown below:
+If you are not using the voice files included with this code example, please do not forget to modify the Epson-provided key code in isc_msgs.c file. Please also note that it must be entered in reverse order. For example, the key code **0x1AAA1F85** has to be provided as it is shown below:
 
 ```
 unsigned char aucIscTestReq[HEADER_LEN + LEN_ISC_TEST_REQ] = {
@@ -152,7 +152,7 @@ The audio volume level is hardcoded in this code example. Please modify the isc_
 
 ### Debugging
 
-If you have successfully imported the example, the debug configurations are already prepared to use with the KitProg3, MiniProg4. Open the ModusToolbox perspective and find the Quick Panel. Click on the desired debug launch configuration and wait until the programming completes and the debugging starts.
+If you have successfully imported the example, the debug configurations are already prepared to use with the KitProg3 and MiniProg4. Open the ModusToolbox perspective and find the Quick Panel. Click the desired debug launch configuration and wait until programming completes and debugging starts.
 
 <img src="images/tts_debug.png" style="zoom:100%;" />
 
